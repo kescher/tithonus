@@ -1,0 +1,21 @@
+{
+
+  "manifest_version": 2,
+  "name": "Tithonus",
+  "version": "1.0",
+
+  "description": "Extension for Twitter that subjects tweets loaded with infinite scroll to decay.",
+
+  "icons": {
+    "48": "icons/cricket.png",
+    "96": "icons/cricket@2x.png"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://*.twitter.com/*"],
+      "js": ["tithonus.js"]
+    }
+  ]
+
+}
