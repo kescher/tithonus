@@ -1,9 +1,16 @@
+function getActiveTab() {
+  return browser.tabs.query({active: true, currentWindow: true});
+}
+
 function saveOptions(e) {
   browser.storage.local.set({
     decay_rate: document.getElementById("decay-slider").value
   });
   syncLabelWithSlider();
   e.preventDefault();
+  return getActiveTab().then((tabs) => {
+      browser.tabs.sendMessage(tabs[0].id, { decay_rate : document.getElementById("decay-slider").value });
+  });
 }
 
 function restoreOptions() {

@@ -13,12 +13,13 @@
 
   "permissions" : [
     "activeTab",
+    "tabs",
     "storage"
   ],
 
   "browser_action": {
     "default_icon": "icons/cricket.png",
-    "default_title": "Tithonus",
+    "default_title": "Tithonus - Twitter Decay",
     "default_popup": "popup/options.html"
   },
 
@@ -29,23 +30,17 @@
     }
   },
 
+  "background": {
+    "scripts": ["tithonus_background.js"]
+  },
+
   "content_scripts": [
     {
       "matches": ["*://*.twitter.com/*"],
       "all_frames": true,
-            "exclude_globs":    [   
-                "*://*.twitter.com/i/cards/*",
-                "*://platform.twitter.com/widgets/*",
-                "*://analytics.twitter.com/*"
-                                ],
-            "exclude_matches":  [   
-                "*://*.twitter.com/i/cards/*",
-                "*://platform.twitter.com/widgets/*",
-                "*://analytics.twitter.com/*"
-                                ],
-            "run_at": "document_start",
+    
       "css": ["tithonus.css"],
-      "js": ["tithonus.js"]
+      "js": ["tithonus.js", "jquery-3.3.1.slim.min.js"]
     }
   ]
 
