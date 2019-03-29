@@ -11,9 +11,40 @@
     "96": "icons/cricket@2x.png"
   },
 
+  "permissions" : [
+    "activeTab",
+    "storage"
+  ],
+
+  "browser_action": {
+    "default_icon": "icons/cricket.png",
+    "default_title": "Tithonus",
+    "default_popup": "popup/options.html"
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "tithonus@kescher.github.io",
+      "strict_min_version": "42.0"
+    }
+  },
+
   "content_scripts": [
     {
       "matches": ["*://*.twitter.com/*"],
+      "all_frames": true,
+            "exclude_globs":    [   
+                "*://*.twitter.com/i/cards/*",
+                "*://platform.twitter.com/widgets/*",
+                "*://analytics.twitter.com/*"
+                                ],
+            "exclude_matches":  [   
+                "*://*.twitter.com/i/cards/*",
+                "*://platform.twitter.com/widgets/*",
+                "*://analytics.twitter.com/*"
+                                ],
+            "run_at": "document_start",
+      "css": ["tithonus.css"],
       "js": ["tithonus.js"]
     }
   ]
