@@ -5,9 +5,9 @@ function getActiveTab() {
 function decayUpdate() {
   getActiveTab().then((tabs) => { 
     var gettingDecay = browser.storage.local.get('decay_rate');
-    gettingDecay.then((decay) => {
-      if (decay) {
-        browser.tabs.sendMessage(tabs[0].id, {decay_rate: decay});
+    gettingDecay.then((res) => {
+      if (res) {
+        browser.tabs.sendMessage(tabs[0].id, {decay_rate: res.decay_rate});
       }
     });
   }); 
