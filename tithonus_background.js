@@ -2,6 +2,7 @@ function getActiveTab() {
   return browser.tabs.query({active: true, currentWindow: true});
 }
 
+
 function decayUpdate() {
   getActiveTab().then((tabs) => { 
     var gettingDecay = browser.storage.local.get('decay_rate');

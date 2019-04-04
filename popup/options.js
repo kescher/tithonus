@@ -33,9 +33,6 @@ function syncLabelWithSlider() {
     document.getElementById("decay-rate").innerHTML = document.getElementById("decay-slider").value;
 }
 
-
-// TODO FIX THE DECAY RATE
-
 document.addEventListener('DOMContentLoaded', function() {
   restoreOptions().then(() => {
     syncLabelWithSlider();
