@@ -150,6 +150,18 @@ var Z = {
                 return a;
             });
         return output.join('');
+    },
+    zalgo_char: function(a) {
+    	if(a == " ") return a;
+
+        for(var i = 0, l = Z.random(16);
+            i<l;i++){
+                var rand = Z.random(3);
+            a += Z.chars[rand][
+                Z.random(Z.chars[rand].length)
+                ];
+         }
+        return a;
     }
 };
 
@@ -239,6 +251,9 @@ function recurseChildrenDecay(node, decay_rate) {
 	// console.log("processing node");
 	// console.log(node);
 
+	// CONSIDER
+	// for higher hit rate, looping through each char in tweet
+
 	
 	for (var i = 0; i < node.childNodes.length; ++i) {
 		
@@ -254,17 +269,32 @@ function recurseChildrenDecay(node, decay_rate) {
 				let rg_abs = Math.abs(parseFloat(rg));
 				let text_length = nodetext.length;
 				let decay_chars = Math.floor(text_length * rg_abs);
-				// console.log(decay_chars + " will be decayed" + " of " + text_length + " from " + rg_abs + " and " + rg + " at decay " + decay_rate);
 				
 				for (var k = 0; k < decay_chars; ++k) {
-					var target_idx = Math.floor(Math.random() * nodetext.length);
-					nodetext = nodetext.slice(0, target_idx) + '*' + nodetext.slice(target_idx + 1, nodetext.length);
+					let target_idx = Math.floor(Math.random() * nodetext.length);
+					let code = nodetext.charCodeAt(target_idx); 
+					if ((code > 47 && code < 58) || // numeric (0-9)
+				        (code > 64 && code < 91) || // upper alpha (A-Z)
+				        (code > 96 && code < 123)) { // lower alpha (a-z)
+				      nodetext = nodetext.slice(0, target_idx) + Z.zalgo_char(nodetext.charAt(target_idx)) + nodetext.slice(target_idx + 1, nodetext.length);
+				    }
 				}
 
-				// to do the whiteout, choose values up front, then iterate BACKWARDS adding span at indices ;D
+				rg = Math.randomGaussian(decay_rate, 0.05);
+				rg_abs = Math.abs(parseFloat(rg));
+				let blank_chars = Math.floor(text_length * rg_abs);
+
+				for (var k = 0; k < blank_chars; ++k) {
+					let target_idx = Math.floor(Math.random() * nodetext.length);
+					let code = nodetext.charCodeAt(target_idx); 
+					if ((code > 47 && code < 58) || // numeric (0-9)
+				        (code > 64 && code < 91) || // upper alpha (A-Z)
+				        (code > 96 && code < 123)) { // lower alpha (a-z)
+				      nodetext = nodetext.slice(0, target_idx) + " " + nodetext.slice(target_idx + 1, nodetext.length);
+				    }
+				}
 
 				node.childNodes[i].nodeValue = nodetext;
-				console.log(node.childNodes[i].nodeValue);
 			}
 		} else {
 			recurseChildrenDecay(node.childNodes[i], decay_rate);
