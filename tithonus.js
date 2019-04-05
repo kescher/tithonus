@@ -136,21 +136,6 @@ var Z = {
         if (len == 1) return 0;
         return !!len ? Math.floor(Math.random() * len + 1) - 1 : Math.random();
     },
-    generate: function(str) {
-        var str_arr = str.split(''),
-            output = str_arr.map(function(a) {
-                if(a == " ") return a;
-                for(var i = 0, l = Z.random(16);
-                    i<l;i++){
-                        var rand = Z.random(3);
-                    a += Z.chars[rand][
-                        Z.random(Z.chars[rand].length)
-                        ];
-                 }
-                return a;
-            });
-        return output.join('');
-    },
     zalgo_char: function(a) {
     	if(a == " ") return a;
 
@@ -236,6 +221,8 @@ function imageDecay() {
 
   	$('img').css("filter", filter_val);
   	$('.u-block').css("filter", filter_val);
+  	$('.AdaptiveMedia-container').css("filter", filter_val);
+  	$('.TwitterCard').css("filter", filter_val);
 }
 
 function s_curve(x) {
