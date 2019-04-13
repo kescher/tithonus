@@ -6,9 +6,28 @@ const MAX = 1.0;
 const MIN = 0.0;
 let alpha = 1;
 
-let decay_rate = 0.0;
+let decay_rate = -1.0;
 
-// Joel Kirchartz, JSFiddle http://jsfiddle.net/JKirchartz/wwckP/
+// levels of obliteration
+// 10 blank, 10 decay -- all gone
+// 5, 5 -- about 0-3 zalgo'd chars per tweet
+// 2, 2 -- illegible, always some chars present, mostly zalgo'd
+// 1, 1 -- illegible
+// 0.8, 0.8
+// 0.8, 0.3
+// 0.5, 0.5 -- illegible
+// 0.5, 0.2 -- 
+// 0.4, 0.4
+// 0.4, 0.2
+// 0.2 0.2 -- annoying, would def stop here
+// 0.1 0.1 -- annoying
+// 0.05 0.05 -- annoying, might stop here
+// 0.01 0.05 -- better increase in noticable
+// 0.01 (deviation 0.0001), 0.01 -- noticable
+// 0.001 0.01 -- subtle, we like it
+// 0.001 0.005 -- subtle, he's coming
+
+// modified from Joel Kirchartz, JSFiddle http://jsfiddle.net/JKirchartz/wwckP/
 var Z = {
     chars: {
         0 : [ /* up */
@@ -213,11 +232,59 @@ var Z = {
 
 })();
 
-function imageDecay() {
-	
-	let decay_percent = isNaN(decay_rate)? 50 : (100 * decay_rate);
+function imageBleachFunction(injections, dr) {
 
-	let filter_val = "brightness(" + (100 + 3 * decay_percent) + "%) saturate(" + (100 - decay_percent) + "%) blur(" + (decay_rate * 10) + "px)";
+	// brightness
+
+	let drdiff = 1 - dr;
+	let base = 3 - (2 * drdiff);
+	let diff = (0.3 * Math.pow(base, (injections - drdiff * 50)));
+	let add = diff < 400 ? diff : 400;
+
+	return 100 + add;
+}
+
+function imageFadeFunction(injections,dr) {
+
+	// saturation
+	let drdiff = 1 - dr;
+	let base = 3 - (2 * drdiff);
+	let diff = (0.1 * Math.pow(base, (injections - drdiff * 50)));
+	let sub = diff < 100 ? diff : 100;
+
+	return 100-sub;
+}
+
+function imageBlurFunction(injections, dr) {
+	let drdiff = 1 - dr;
+	let base = 3 - (2 * drdiff);
+	let retval = (0.1 * Math.pow(base, (injections - drdiff * 50)));
+	return retval < 10 ? retval : 10;
+}
+
+function imageDecay(dr) {
+
+	if (isNaN(dr) || dr < 0.05) {
+		console.log("decay rate DQed bc " + dr);
+		return;
+	}
+
+	let injections = $(".tweet[injections]");
+	let injection_num = 0;
+	if (injections.length > 0) {
+		injection_num = parseInt(injections[0].getAttribute("injections"));
+	}
+
+	if (injection_num == 0) {
+		// console.log("first injection");
+		return;
+	}
+
+	let blur_rate = imageBlurFunction(injection_num, dr);
+	let bleach_rate = imageBleachFunction(injection_num,dr);
+	let fade_rate = imageFadeFunction(injection_num, dr);
+
+	let filter_val = "brightness(" + String(bleach_rate) + "%) saturate(" + String(fade_rate) + "%) blur(" + String(blur_rate) + "px)";
 
   	$('img').css("filter", filter_val);
   	$('.u-block').css("filter", filter_val);
@@ -225,22 +292,35 @@ function imageDecay() {
   	$('.TwitterCard').css("filter", filter_val);
 }
 
-function s_curve(x) {
-	return (x)
+function zalgo_rate(dr, injections) {
+
+	// lalala curvy curve
+
+	let drdiff = 1 - dr;
+	let base = 3 - (2 * drdiff);
+	let retval = (0.1 * Math.pow(base, (injections - drdiff * 50)) + 0.0035);
+	return retval < 10 ? retval : 10;
+
 }
 
-function recurseChildrenDecay(node, decay_rate) {
+function blank_rate(dr, injections) {
+
+	// lalala curvy curve
+
+	let drdiff = 1 - dr;
+	let base = 3 - (2 * drdiff);
+	let retval = (0.1 * Math.pow(base, (injections - drdiff * 60)));
+	return retval < 10 ? retval : 10;
+
+}
+
+function recurseChildrenDecay(node, dr, injections) {
 
 	if (!node || !node.childNodes) {
 		return;
 	}
 
-	// console.log("processing node");
-	// console.log(node);
-
-	// CONSIDER
-	// for higher hit rate, looping through each char in tweet
-
+	let rate = dr * .01 * injections
 	
 	for (var i = 0; i < node.childNodes.length; ++i) {
 		
@@ -252,11 +332,26 @@ function recurseChildrenDecay(node, decay_rate) {
 				var nodetext = (node.childNodes[i].nodeValue).toString();
 				
 				// number of character to decay for this text
-				let rg = Math.randomGaussian(decay_rate, 0.05);
+				let rg = Math.randomGaussian(zalgo_rate(dr, injections), 0.0001);
 				let rg_abs = Math.abs(parseFloat(rg));
 				let text_length = nodetext.length;
+				
 				let decay_chars = Math.floor(text_length * rg_abs);
 				
+				// number of character to white out for this text
+				rg = Math.randomGaussian(blank_rate(dr, injections), 0.0001);
+				rg_abs = Math.abs(parseFloat(rg));
+
+				let blank_chars = Math.floor(text_length * rg_abs);
+
+				for (var k = 0; k < blank_chars; ++k) {
+					let target_idx = Math.floor(Math.random() * nodetext.length);
+					let code = nodetext.charCodeAt(target_idx); 
+					if (code > 33 && code < 126) { // a-z & A-Z & 0-9 & common punctuation
+				      nodetext = nodetext.slice(0, target_idx) + " " + nodetext.slice(target_idx + 1, nodetext.length);
+				    }
+				}
+
 				for (var k = 0; k < decay_chars; ++k) {
 					let target_idx = Math.floor(Math.random() * nodetext.length);
 					let code = nodetext.charCodeAt(target_idx); 
@@ -267,69 +362,72 @@ function recurseChildrenDecay(node, decay_rate) {
 				    }
 				}
 
-				rg = Math.randomGaussian(decay_rate, 0.05);
-				rg_abs = Math.abs(parseFloat(rg));
-				let blank_chars = Math.floor(text_length * rg_abs);
-
-				for (var k = 0; k < blank_chars; ++k) {
-					let target_idx = Math.floor(Math.random() * nodetext.length);
-					let code = nodetext.charCodeAt(target_idx); 
-					if ((code > 47 && code < 58) || // numeric (0-9)
-				        (code > 64 && code < 91) || // upper alpha (A-Z)
-				        (code > 96 && code < 123)) { // lower alpha (a-z)
-				      nodetext = nodetext.slice(0, target_idx) + " " + nodetext.slice(target_idx + 1, nodetext.length);
-				    }
-				}
-
 				node.childNodes[i].nodeValue = nodetext;
 			}
 		} else {
-			recurseChildrenDecay(node.childNodes[i], decay_rate);
+			recurseChildrenDecay(node.childNodes[i], dr, injections);
 		}
 	}
 }
 
-function textDecay() {
+
+
+function textDecay(dr) {
+
+	if (dr < 0.05) {
+		return;
+	}
 
 	// var tweets = $(".tweet-text").toArray();
 	var tweets = $(".tweet").toArray();
 
-	if (tweets.length != 0) {
-		for (var i = 0; i < tweets.length; ++i) {
+	var decayed_count = $(".decayed").length;
 
-			// console.log(tweets[i]);
+	if (decayed_count == 0) {
+		$(".tweet").addClass("decayed");
+		$(".tweet").attr("injections", "0");
+		return;
+	}
+
+	if (tweets.length != 0 && decayed_count < tweets.length) {
+
+		let injections = $(".tweet[injections]");
+		let injection_num = 0;
+		if (injections.length > 0) {
+			
+			injection_num = parseInt(injections[0].getAttribute("injections"));
+		}
+
+		console.log("injection_num " + String(injection_num));
+
+		for (var i = 0; i < tweets.length; ++i) {
 			if (!tweets[i].classList.contains('decayed')) {
-				recurseChildrenDecay(tweets[i], decay_rate);
+				recurseChildrenDecay(tweets[i], dr, injection_num);
 			}
 
 			tweets[i].classList.add('decayed');
 		}
+
+		$(".tweet").attr("injections", String(injection_num + 1));
 	}
 }
 
-function updateDecay(request, sender, sendResponse) {
-	decay_rate = request.decay_rate;
-  	imageDecay();
-  	textDecay();
-
-  	var feet = document.getElementsByClassName("stream-footer");
-
-  	for (var i = 0; i < feet.length; ++i) {
-  		feet[i].addEventListener("reposition", function(){
-			console.log("more tweets!!");
-			imageDecay();
-		  	textDecay();
-		});
-  	}
-  	
-
+function decayImageAndText() {
+	let dr = decay_rate;
+	imageDecay(dr);
+  	textDecay(dr);
 }
 
-// character deletions
+function updateDecay(request, sender, sendResponse) {
+	decay_rate = parseFloat(request.decay_rate);
+	
+	decayImageAndText();
+}
 
-// character insertions
-
-// character zalgo
-
-
-// capture when infinite scroll has loaded more tweets
+// capture when more stuff loads
+var target = document.querySelector('body');
+var observer = new MutationObserver(function(mutations) {
+    decayImageAndText();
+});
+var config = { attributes: true, childList: true, subtree: true, characterData: true }
+observer.observe(target, config);
