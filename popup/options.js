@@ -22,25 +22,7 @@ function restoreOptions() {
       return getActiveTab().then((tabs) => {
         browser.tabs.sendMessage(tabs[0].id, { decay_rate : document.getElementById("decay-slider").value });
       });
-    } else {
-      console.log("default");
-      document.getElementById("decay-slider").value = "0.9";
-      browser.storage.local.set({
-        decay_rate: document.getElementById("decay-slider").value
-      });
-      return getActiveTab().then((tabs) => {
-        browser.tabs.sendMessage(tabs[0].id, { decay_rate : document.getElementById("decay-slider").value });
-    });
     }
-  }).
-  catch(() => {
-    document.getElementById("decay-slider").value = "0.9";
-    browser.storage.local.set({
-        decay_rate: document.getElementById("decay-slider").value
-      });
-    return getActiveTab().then((tabs) => {
-        browser.tabs.sendMessage(tabs[0].id, { decay_rate : document.getElementById("decay-slider").value });
-    });
   });
 }
 

@@ -37,8 +37,6 @@
   "content_scripts": [
     {
       "matches": ["*://*.twitter.com/*"],
-      "all_frames": true,
-    
       "css": ["tithonus.css"],
       "js": ["tithonus.js", "jquery-3.3.1.slim.min.js"]
     }

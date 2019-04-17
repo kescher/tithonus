@@ -1,4 +1,4 @@
-console.log("tith start");
+console.log("tithonus turns his eternal eye on yr feed");
 
 browser.runtime.onMessage.addListener(updateDecay);
 
@@ -7,27 +7,6 @@ const MIN = 0.0;
 let alpha = 1;
 
 let decay_rate = -1.0;
-
-// TODO no injection if clicking on tweet
-
-// levels of obliteration
-// 10 blank, 10 decay -- all gone
-// 5, 5 -- about 0-3 zalgo'd chars per tweet
-// 2, 2 -- illegible, always some chars present, mostly zalgo'd
-// 1, 1 -- illegible
-// 0.8, 0.8
-// 0.8, 0.3
-// 0.5, 0.5 -- illegible
-// 0.5, 0.2 -- 
-// 0.4, 0.4
-// 0.4, 0.2
-// 0.2 0.2 -- annoying, would def stop here
-// 0.1 0.1 -- annoying
-// 0.05 0.05 -- annoying, might stop here
-// 0.01 0.05 -- better increase in noticable
-// 0.01 (deviation 0.0001), 0.01 -- noticable
-// 0.001 0.01 -- subtle, we like it
-// 0.001 0.005 -- subtle, he's coming
 
 // modified from Joel Kirchartz, JSFiddle http://jsfiddle.net/JKirchartz/wwckP/
 var Z = {
@@ -171,7 +150,7 @@ var Z = {
     }
 };
 
-// randomGaussian taken from http://www.ollysco.de/2012/04/gaussian-normal-functions-in-javascript.html
+// modified from Olly Oechsle, http://www.ollysco.de/2012/04/gaussian-normal-functions-in-javascript.html
 (function() {
 
     /**
@@ -266,20 +245,20 @@ function imageBlurFunction(injections, dr) {
 
 function imageDecay(dr) {
 
+	// disqualify strange decay rates
 	if (isNaN(dr) || dr < 0.05) {
-		console.log("decay rate DQed bc " + dr);
-		console.log(dr);
 		return;
 	}
 
+	// count loads of new tweets
 	let injections = $(".tweet[injections]");
 	let injection_num = 0;
 	if (injections.length > 0) {
 		injection_num = parseInt(injections[0].getAttribute("injections"));
 	}
 
+	// don't decay on first load
 	if (injection_num == 0) {
-		// console.log("first injection");
 		return;
 	}
 
@@ -293,12 +272,12 @@ function imageDecay(dr) {
   	$('.u-block').css("filter", filter_val);
   	$('.AdaptiveMedia-container').css("filter", filter_val);
   	$('.TwitterCard').css("filter", filter_val);
+  	$('iframe').css("filter", filter_val);
 }
 
 function zalgo_rate(dr, injections) {
 
 	// lalala curvy curve
-
 	let drdiff = 1 - dr;
 	let base = 3 - (2 * drdiff);
 	let retval = (0.1 * Math.pow(base, (injections - drdiff * 50)) + 0.0035);
@@ -309,7 +288,6 @@ function zalgo_rate(dr, injections) {
 function blank_rate(dr, injections) {
 
 	// lalala curvy curve
-
 	let drdiff = 1 - dr;
 	let base = 3 - (2 * drdiff);
 	let retval = (0.1 * Math.pow(base, (injections - drdiff * 60)));
@@ -381,17 +359,18 @@ function textDecay(dr) {
 		return;
 	}
 
-	// var tweets = $(".tweet-text").toArray();
 	var tweets = $(".tweet").toArray();
 
 	var decayed_count = $(".decayed").length;
 
+	// first load of tweets
 	if (decayed_count == 0) {
 		$(".tweet").addClass("decayed");
 		$(".tweet").attr("injections", "0");
 		return;
 	}
 
+	// there are new tweets to suffer the pull of eternity
 	if (tweets.length != 0 && decayed_count < tweets.length) {
 
 		let injections = $(".tweet[injections]");
@@ -401,8 +380,6 @@ function textDecay(dr) {
 			injection_num = parseInt(injections[0].getAttribute("injections"));
 		}
 
-		console.log("injection_num " + String(injection_num));
-
 		for (var i = 0; i < tweets.length; ++i) {
 			if (!tweets[i].classList.contains('decayed')) {
 				recurseChildrenDecay(tweets[i], dr, injection_num);
@@ -411,28 +388,22 @@ function textDecay(dr) {
 			tweets[i].classList.add('decayed');
 		}
 
-		$(".tweet").attr("injections", String(injection_num + 1));
+		// this prevents additional decay when clicking on a tweet
+		if ($("#permalink-overlay").css("display") == "none") {
+			$(".tweet").attr("injections", String(injection_num + 1));
+		}
 	}
 }
 
 function decayImageAndText() {
 	let dr = decay_rate;
-	console.log("decay i&t:");
-	console.log(dr);
 	imageDecay(dr);
   	textDecay(dr);
 }
 
 // receive message about new decay
 function updateDecay(request, sender, sendResponse) {
-	console.log("decay ud, precast:");
-	console.log(request.decay_rate);
-
 	decay_rate = parseFloat(request.decay_rate);
-
-	console.log("decay ud, postcast:");
-	console.log(decay_rate);
-	
 	decayImageAndText();
 }
 
