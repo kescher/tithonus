@@ -8,6 +8,8 @@ let alpha = 1;
 
 let decay_rate = -1.0;
 
+// TODO no injection if clicking on tweet
+
 // levels of obliteration
 // 10 blank, 10 decay -- all gone
 // 5, 5 -- about 0-3 zalgo'd chars per tweet
@@ -266,6 +268,7 @@ function imageDecay(dr) {
 
 	if (isNaN(dr) || dr < 0.05) {
 		console.log("decay rate DQed bc " + dr);
+		console.log(dr);
 		return;
 	}
 
@@ -414,12 +417,21 @@ function textDecay(dr) {
 
 function decayImageAndText() {
 	let dr = decay_rate;
+	console.log("decay i&t:");
+	console.log(dr);
 	imageDecay(dr);
   	textDecay(dr);
 }
 
+// receive message about new decay
 function updateDecay(request, sender, sendResponse) {
+	console.log("decay ud, precast:");
+	console.log(request.decay_rate);
+
 	decay_rate = parseFloat(request.decay_rate);
+
+	console.log("decay ud, postcast:");
+	console.log(decay_rate);
 	
 	decayImageAndText();
 }
