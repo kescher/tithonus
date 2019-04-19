@@ -12,3 +12,7 @@ Try it out!
 
 **Firefox instructions**:
 https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Temporary_Installation_in_Firefox
+  
+  
+  
+*Tithonus, in Greek legend, son of Laomedon, king of Troy, and of Strymo, daughter of the river Scamander. Eos (Aurora) fell in love with Tithonus and took him to Ethiopia, where she bore Emathion and Memnon. According to the Homeric Hymn to Aphrodite, when Eos asked Zeus to grant Tithonus eternal life, the god consented. But Eos forgot to ask also for eternal youth, so her husband grew old and withered. In a later version Tithonus was transformed into a cicada.* [Britannica](https://www.britannica.com/topic/Tithonus-Greek-mythology)
