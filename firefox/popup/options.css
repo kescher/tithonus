@@ -1,0 +1,70 @@
+body {
+  font-family: 'Share Tech Mono', monospace;
+  background-color: black;
+  color: lightgray;
+  font-size:13px;
+
+}
+h1 {
+  color: white;
+}
+h2 {
+  font-size: 95%;
+}
+
+#decay-label {
+  font-size: 16px;
+}
+
+.slider-container {
+  font-family: 'Germania One', cursive;
+  text-align: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#decay-slider {
+  -webkit-appearance: none;
+  outline: none;
+  opacity: 0.7;
+  margin: 5px;
+  height: 8px;
+  border-radius: 5px;   
+  background: lightgray;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+#decay-slider:hover {
+  opacity: 1;
+}
+
+#decay-slider::-moz-range-thumb {
+  width: 15px; /* Set a specific slider handle width */
+  height: 15px; /* Slider handle height */
+  border-radius: 50%; 
+  background: #7e2020;
+  border-color:  #7e2020;
+  cursor: pointer; /* Cursor on hover */
+}
+
+input[type=range]::-moz-focus-outer {
+    border: 0;
+}
+
+#popup-container {
+  margin:0px 20px 20px;
+  width:260px;
+  overflow: hidden;
+}
+
+#decay-rate {
+  font-style: bold;
+  color: #7e2020;;
+  padding:15px 15px;
+}
+
+#footer {
+  color: gray;
+  font-size:90%;
+}
