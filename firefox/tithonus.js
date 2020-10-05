@@ -307,14 +307,15 @@ function recurseChildrenDecay(node, dr, injections) {
         
         if (node.childNodes[i].childNodes.length == 0) {
 
-            console.log("BABY NODE FOUND");
-
             // this is a text node
             if (node.childNodes[i].nodeValue) {
 
                 var nodetext = (node.childNodes[i].nodeValue).toString();
-                console.log(nodetext);
                 
+                // TODO Change calculation so each character is whited out/zalgo'd w some percentage
+                // this would be good optimization
+                // possible intenfier: come up with way to set zalgo intensity (# of added marks) by dr
+
                 // number of character to decay for this text
                 let rg = Math.randomGaussian(zalgo_rate(dr, injections), 0.0001);
                 let rg_abs = Math.abs(parseFloat(rg));
@@ -398,6 +399,10 @@ function recurseChildrenDecay(node, dr, injections) {
 
 function textDecay(dr) {
 
+    // TODO: don't increase injection on mouseover of article
+    // possible fix: attach edits + class to parent/child node of article, which appears to not change on mouseover
+    // possible fix: find unique identifier for tweets
+
     if (dr < 0.05) {
         return;
     }
@@ -445,12 +450,15 @@ function textDecay(dr) {
         }
 
         $("#react-root").attr("injections", String(injection_num + 1));
-        
+
     }
 }
 
 function decayImageAndText() {
     let dr = decay_rate;
+
+    // TODO: imagedecay
+
     // imageDecay(dr);
     textDecay(dr);
 }
