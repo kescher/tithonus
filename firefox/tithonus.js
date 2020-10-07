@@ -8,6 +8,19 @@ let alpha = 1;
 
 let decay_rate = -1.0;
 
+const intervals = {
+    10 : 5,
+    9: 10,
+    8: 15,
+    7: 20,
+    6: 25,
+    5: 30,
+    4: 40,
+    3: 50,
+    2: 75,
+    1: 100
+}
+
 // modified from Joel Kirchartz, JSFiddle http://jsfiddle.net/JKirchartz/wwckP/
 var Z = {
     chars: {
@@ -139,7 +152,7 @@ var Z = {
     zalgo_char: function(a) {
         if(a == " ") return a;
 
-        for(var i = 0, l = Z.random(16);
+        for(var i = 0, l = Z.random(10);
             i<l;i++){
                 var rand = Z.random(3);
             a += Z.chars[rand][
@@ -277,22 +290,15 @@ function imageDecay(dr) {
 
 function zalgo_rate(dr, injections) {
 
-    // lalala curvy curve
-    let drdiff = 1 - dr;
-    let base = 3 - (2 * drdiff);
-    let retval = (0.1 * Math.pow(base, (injections - drdiff * 50)) + 0.0035);
+    let retval = (1 / 100) * Math.pow(injections / intervals[parseInt(10 * dr)], 3);
     return retval < 10 ? retval : 10;
-
 }
 
 function blank_rate(dr, injections) {
 
-    // lalala curvy curve
-    let drdiff = 1 - dr;
-    let base = 3 - (2 * drdiff);
-    let retval = (0.1 * Math.pow(base, (injections - drdiff * 60)));
+    let interval = intervals[parseInt(10 * dr)];
+    let retval = (1 / 100) * Math.pow((injections - 0.6 * interval) / interval, 3);
     return retval < 10 ? retval : 10;
-
 }
 
 function recurseChildrenDecay(node, dr, injections) {
@@ -407,7 +413,9 @@ function textDecay(dr) {
         return;
     }
 
-    var tweets = $("article").toArray();
+    var articles = $("article").toArray();
+    // console.log(articles);
+    var tweets = articles.map( x => { return x.parentElement; });
     console.log("tweets:");
     console.log(tweets);
 
@@ -433,7 +441,11 @@ function textDecay(dr) {
         return;
     }
 
-    to_decay = $("article").not(".decayed").toArray();
+    console.log("predecay:");
+    to_decay = tweets.filter((x) => {
+        console.log(x);
+        return !(x.classList.contains("decayed"));
+    });
     console.log("to decay:");
     console.log(to_decay);
 
@@ -447,9 +459,10 @@ function textDecay(dr) {
             to_decay[i].classList.add('decayed');
             console.log("after: ");
             console.log(to_decay[i]);
+            injection_num++;
         }
 
-        $("#react-root").attr("injections", String(injection_num + 1));
+        $("#react-root").attr("injections", String(injection_num));
 
     }
 }
