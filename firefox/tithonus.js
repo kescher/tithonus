@@ -15,11 +15,11 @@ const intervals = {
     7: 20,
     6: 25,
     5: 30,
-    4: 40,
-    3: 50,
-    2: 75,
-    1: 100
-}
+    4: 50,
+    3: 75,
+    2: 100,
+    1: 200
+};
 
 // modified from Joel Kirchartz, JSFiddle http://jsfiddle.net/JKirchartz/wwckP/
 var Z = {
@@ -227,53 +227,25 @@ var Z = {
 })();
 
 function imageBleachFunction(injections, dr) {
-
     // brightness
-
-    let drdiff = 1 - dr;
-    let base = 3 - (2 * drdiff);
-    let diff = (0.3 * Math.pow(base, (injections - drdiff * 50)));
+    let diff = 40 * zalgo_rate(dr, injections); 
     let add = diff < 400 ? diff : 400;
-
-    return 100 + add;
+    return 100+add;
 }
 
 function imageFadeFunction(injections,dr) {
-
     // saturation
-    let drdiff = 1 - dr;
-    let base = 3 - (2 * drdiff);
-    let diff = (0.1 * Math.pow(base, (injections - drdiff * 50)));
+    let diff = 20 * zalgo_rate(dr, injections); 
     let sub = diff < 100 ? diff : 100;
-
     return 100-sub;
 }
 
 function imageBlurFunction(injections, dr) {
-    let drdiff = 1 - dr;
-    let base = 3 - (2 * drdiff);
-    let retval = (0.1 * Math.pow(base, (injections - drdiff * 50)));
-    return retval < 10 ? retval : 10;
+
+    return 2 * zalgo_rate(dr, injections); 
 }
 
-function imageDecay(dr) {
-
-    // disqualify strange decay rates
-    if (isNaN(dr) || dr < 0.05) {
-        return;
-    }
-
-    // count loads of new tweets
-    let injections = $("article[injections]");
-    let injection_num = 0;
-    if (injections.length > 0) {
-        injection_num = parseInt(injections[0].getAttribute("injections"));
-    }
-
-    // don't decay on first load
-    if (injection_num == 0) {
-        return;
-    }
+function imageDecay(dr, injection_num) {
 
     let blur_rate = imageBlurFunction(injection_num, dr);
     let bleach_rate = imageBleachFunction(injection_num,dr);
@@ -281,15 +253,18 @@ function imageDecay(dr) {
 
     let filter_val = "brightness(" + String(bleach_rate) + "%) saturate(" + String(fade_rate) + "%) blur(" + String(blur_rate) + "px)";
 
+    $("div[data-testid='tweetPhoto']").css('filter', filter_val);
+    $("div[data-testid='videoPlayer']").css('filter', filter_val);
+    $("div[data-testid='card.wrapper']").css('filter', filter_val);
+    $("div[data-testid='tweet'] > div:first-child").css('filter', filter_val);
+    $("div[role='presentation']").css('filter', filter_val);
+    $("svg[aria-label='Verified account']").css('filter', filter_val);
     $('img').css("filter", filter_val);
-    $('.u-block').css("filter", filter_val);
-    $('.AdaptiveMedia-container').css("filter", filter_val);
-    $('.TwitterCard').css("filter", filter_val);
-    $('iframe').css("filter", filter_val);
 }
 
 function zalgo_rate(dr, injections) {
 
+    // lalala curvy curve
     let retval = (1 / 100) * Math.pow(injections / intervals[parseInt(10 * dr)], 3);
     return retval < 10 ? retval : 10;
 }
@@ -361,63 +336,38 @@ function recurseChildrenDecay(node, dr, injections) {
     }
 }
 
-// function textDecay_update(dr) {
+function textDecay(dr, injection_num, tweets) {
 
-//     if (dr < 0.05) {
-//         return;
-//     }
+    to_decay = tweets.filter((x) => {
+        return !(x.classList.contains("decayed"));
+    });
 
-//     var tweets = $("article").toArray();
+    // // there are new tweets to suffer the pull of eternity
+    if (to_decay.length > 0) {
 
-//     var decayed_count = $(".decayed").length;
+        for (var i = 0; i < to_decay.length; ++i) {
+            recurseChildrenDecay(to_decay[i], dr, injection_num);
+            to_decay[i].classList.add('decayed');
+            injection_num++;
+        }
 
-//     // first load of tweets
-//     if (decayed_count == 0) {
-//         $("article").addClass("decayed");
-//         $("article").attr("injections", "0");
-//         return;
-//     }
+        $("#react-root").attr("injections", String(injection_num));
+    }
+}
 
-//     // there are new tweets to suffer the pull of eternity
-//     if (tweets.length != 0 && decayed_count < tweets.length) {
+function decayImageAndText() {
 
-//         let injections = $("article[injections]");
-//         let injection_num = 0;
-//         if (injections.length > 0) {
-            
-//             injection_num = parseInt(injections[0].getAttribute("injections"));
-//         }
+    let dr = decay_rate;
 
-//         for (var i = 0; i < tweets.length; ++i) {
-//             if (!tweets[i].classList.contains('decayed')) {
-//                 recurseChildrenDecay(tweets[i], dr, injection_num);
-//             }
-
-//             tweets[i].classList.add('decayed');
-//         }
-
-//         // this prevents additional decay when clicking on a tweet
-//         if ($("#permalink-overlay").css("display") == "none") {
-//             $("article").attr("injections", String(injection_num + 1));
-//         }
-//     }
-// }
-
-function textDecay(dr) {
-
-    // TODO: don't increase injection on mouseover of article
-    // possible fix: attach edits + class to parent/child node of article, which appears to not change on mouseover
-    // possible fix: find unique identifier for tweets
-
-    if (dr < 0.05) {
+    // disqualify strange decay rates
+    if (isNaN(dr) || dr < 0.05) {
         return;
     }
 
     var articles = $("article").toArray();
-    // console.log(articles);
     var tweets = articles.map( x => { return x.parentElement; });
-    console.log("tweets:");
-    console.log(tweets);
+    // console.log("tweets:");
+    // console.log(tweets);
 
     // no tweets loaded yet
     if (tweets.length < 1) {
@@ -430,10 +380,10 @@ function textDecay(dr) {
 
     // For some browsers, `attr` is undefined; for others, `attr` is false. Check for both.
     if (typeof injections !== typeof undefined && injections !== false) {
-        console.log("has injections");
+        // console.log("has injections");
         injection_num = parseInt(injections);
     } else {
-        console.log("doesnt");
+        // console.log("doesnt");
         $("#react-root").attr("injections", "0");
         for (var i = 0; i < tweets.length; ++i) {
             tweets[i].classList.add('decayed');
@@ -441,39 +391,10 @@ function textDecay(dr) {
         return;
     }
 
-    console.log("predecay:");
-    to_decay = tweets.filter((x) => {
-        console.log(x);
-        return !(x.classList.contains("decayed"));
-    });
-    console.log("to decay:");
-    console.log(to_decay);
-
-    // // there are new tweets to suffer the pull of eternity
-    if (to_decay.length > 0) {
-
-        for (var i = 0; i < to_decay.length; ++i) {
-            console.log("before: ");
-            console.log(to_decay[i]);
-            recurseChildrenDecay(to_decay[i], dr, injection_num);
-            to_decay[i].classList.add('decayed');
-            console.log("after: ");
-            console.log(to_decay[i]);
-            injection_num++;
-        }
-
-        $("#react-root").attr("injections", String(injection_num));
-
-    }
-}
-
-function decayImageAndText() {
-    let dr = decay_rate;
-
     // TODO: imagedecay
 
-    // imageDecay(dr);
-    textDecay(dr);
+    imageDecay(dr, injection_num);
+    textDecay(dr, injection_num, tweets);
 }
 
 // receive message about new decay
