@@ -9,18 +9,19 @@ let alpha = 1;
 
 let decay_rate = -1.0;
 
-    const intervals = {
-        10 : 5,
-        9: 10,
-        8: 15,
-        7: 20,
-        6: 25,
-        5: 30,
-        4: 40,
-        3: 50,
-        2: 75,
-        1: 100
-    }
+// tweet intervals for each stage - decayed across 4 stages
+const intervals = {
+    10 : 5,
+    9: 10,
+    8: 15,
+    7: 20,
+    6: 25,
+    5: 30,
+    4: 40,
+    3: 50,
+    2: 75,
+    1: 100
+}
 
 // modified from Joel Kirchartz, JSFiddle http://jsfiddle.net/JKirchartz/wwckP/
 var Z = {
@@ -277,7 +278,7 @@ function blank_rate(dr, injections) {
 
 	// lalala curvy curve
     let interval = intervals[parseInt(10 * dr)];
-    let retval = (1 / 100) * Math.pow((injections - 0.6 * interval) / interval, 3);
+    let retval = (1 / 100) * Math.pow((injections - 0.75 * interval) / interval, 3);
     return retval < 10 ? retval : 10;
 
 }
@@ -342,24 +343,16 @@ function recurseChildrenDecay(node, dr, injections) {
 
 function textDecay(dr, injection_num, tweets) {
 
-    // console.log("predecay:");
     to_decay = tweets.filter((x) => {
-        // console.log(x);
         return !(x.classList.contains("decayed"));
     });
-    // console.log("to decay:");
-    // console.log(to_decay);
-
+ 
     // // there are new tweets to suffer the pull of eternity
     if (to_decay.length > 0) {
 
         for (var i = 0; i < to_decay.length; ++i) {
-            // console.log("before: ");
-            // console.log(to_decay[i]);
             recurseChildrenDecay(to_decay[i], dr, injection_num);
             to_decay[i].classList.add('decayed');
-            // console.log("after: ");
-            // console.log(to_decay[i]);
             injection_num++;
         }
 
@@ -377,8 +370,6 @@ function decayImageAndText() {
 
     var articles = $("article").toArray();
     var tweets = articles.map( x => { return x.parentElement; });
-    // console.log("tweets:");
-    // console.log(tweets);
 
     // no tweets loaded yet
     if (tweets.length < 1) {
@@ -391,10 +382,8 @@ function decayImageAndText() {
 
     // For some browsers, `attr` is undefined; for others, `attr` is false. Check for both.
     if (typeof injections !== typeof undefined && injections !== false) {
-        // console.log("has injections");
         injection_num = parseInt(injections);
     } else {
-        // console.log("doesnt");
         $("#react-root").attr("injections", "0");
         for (var i = 0; i < tweets.length; ++i) {
             tweets[i].classList.add('decayed');
@@ -402,7 +391,6 @@ function decayImageAndText() {
         return;
     }
 
-    // TODO: imagedecay
     imageDecay(dr, injection_num);
     textDecay(dr, injection_num, tweets);
 }

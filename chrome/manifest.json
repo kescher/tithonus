@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "Tithonus",
-  "version": "2.0",
+  "version": "2.1",
 
   "description": "Extension for Twitter that subjects tweets loaded with infinite scroll to decay.",
 
@@ -12,7 +12,6 @@
   },
 
   "permissions" : [
-    "activeTab",
     "tabs",
     "storage"
   ],

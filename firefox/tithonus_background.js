@@ -11,10 +11,10 @@ function decayUpdate() {
       } else {
         // no stored decay rate, use default
         return browser.storage.local.set({
-            decay_rate: "0.9"
+            decay_rate: "0.7"
         }).then( () => {
             return getActiveTab().then((tabs) => {
-                browser.tabs.sendMessage(tabs[0].id, { decay_rate : "0.9" });
+                browser.tabs.sendMessage(tabs[0].id, { decay_rate : "0.7" });
             });
         });
       }

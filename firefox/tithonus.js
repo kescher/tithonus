@@ -8,6 +8,7 @@ let alpha = 1;
 
 let decay_rate = -1.0;
 
+// tweet intervals for each stage - decayed across 4 stages
 const intervals = {
     10 : 5,
     9: 10,
@@ -272,7 +273,7 @@ function zalgo_rate(dr, injections) {
 function blank_rate(dr, injections) {
 
     let interval = intervals[parseInt(10 * dr)];
-    let retval = (1 / 100) * Math.pow((injections - 0.6 * interval) / interval, 3);
+    let retval = (1 / 100) * Math.pow((injections - 0.75 * interval) / interval, 3);
     return retval < 10 ? retval : 10;
 }
 
@@ -292,10 +293,6 @@ function recurseChildrenDecay(node, dr, injections) {
             if (node.childNodes[i].nodeValue) {
 
                 var nodetext = (node.childNodes[i].nodeValue).toString();
-                
-                // TODO Change calculation so each character is whited out/zalgo'd w some percentage
-                // this would be good optimization
-                // possible intenfier: come up with way to set zalgo intensity (# of added marks) by dr
 
                 // number of character to decay for this text
                 let rg = Math.randomGaussian(zalgo_rate(dr, injections), 0.0001);

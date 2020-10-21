@@ -11,9 +11,9 @@ function decayUpdate() {
         browser.tabs.sendMessage(tabs[0].id, {decay_rate: res.decay_rate});
       } else {
         // no stored decay rate, use default
-        let default_rate = "0.9";
-        browser.storage.local.set({ decay_rate: "0.9" }, () => {
-              browser.tabs.sendMessage(tabs[0].id, { decay_rate : "0.9" });
+        let default_rate = "0.7";
+        browser.storage.local.set({ decay_rate: "0.7" }, () => {
+              browser.tabs.sendMessage(tabs[0].id, { decay_rate : "0.7" });
         });
       }
     }); 
